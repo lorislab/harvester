@@ -31,6 +31,7 @@ import org.dbunit.database.DatabaseConfig;
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.csv.CsvDataSet;
 import org.dbunit.dataset.datatype.IDataTypeFactory;
 import org.dbunit.dataset.excel.XlsDataSet;
 import org.dbunit.ext.h2.H2DataTypeFactory;
@@ -66,7 +67,7 @@ public final class DbUnitExecutorUtil {
         } catch (ClassNotFoundException e) {
             LOGGER.log(Level.INFO, "Oracle driver not found.");
         }
-        
+
         TYPE_FACTORY.put("H2", new H2DataTypeFactory());
         LOGGER.log(Level.INFO, "H2 driver install.");
     }
@@ -127,7 +128,7 @@ public final class DbUnitExecutorUtil {
      * @param operation the operation.
      * @param fileName the file name.
      */
-    public static void execute(Connection connection, String operation, String fileName) {
+    public static void execute(Connection connection, String operation, String fileName) throws Exception {
         Path path = Paths.get(fileName);
         if (Files.isReadable(path)) {
             execute(connection, operation, path);
@@ -143,26 +144,20 @@ public final class DbUnitExecutorUtil {
      * @param operation the operation.
      * @param path the file path.
      */
-    public static void execute(Connection connection, String operation, Path path) {
+    public static void execute(Connection connection, String operation, Path path) throws Exception {
         LOGGER.log(Level.INFO, "Execute file: {0}", path.toString());
 
-        try {
-            IDatabaseConnection idbConnection = getIDatabaseConnection(connection);
+        IDatabaseConnection idbConnection = getIDatabaseConnection(connection);
+//        try (InputStream in = Files.newInputStream(path)) {
+            IDataSet dataSet = new CsvDataSet(path.toFile());
 
-            try (InputStream in = Files.newInputStream(path)) {
-                IDataSet dataSet = new XlsDataSet(in);
-
-                DatabaseOperation dbOperation = OPERATION.get(operation);
-                if (dbOperation != null) {
-                    dbOperation.execute(idbConnection, dataSet);
-                } else {
-                    LOGGER.log(Level.WARNING, "The operation: {0} is not registred", operation);
-                }
+            DatabaseOperation dbOperation = OPERATION.get(operation);
+            if (dbOperation != null) {
+                dbOperation.execute(idbConnection, dataSet);
+            } else {
+                throw new Exception("The operation: " + operation + " is not registred");
             }
-        } catch (Exception ex) {
-            LOGGER.log(Level.SEVERE, "Error execute operation: {0} file: {1}", new Object[]{operation, path});
-            LOGGER.log(Level.SEVERE, "Error: " + ex.getMessage(), ex);
-        }
+//        }
     }
 
     /**
@@ -176,7 +171,7 @@ public final class DbUnitExecutorUtil {
         IDatabaseConnection result = new DatabaseConnection(connection);
 
         IDataTypeFactory idf = null;
-        
+
         DatabaseMetaData metadata = connection.getMetaData();
         String dbName = metadata.getDatabaseProductName();
 
@@ -187,7 +182,7 @@ public final class DbUnitExecutorUtil {
                 idf = TYPE_FACTORY.get(key);
             }
         }
-        
+
         if (idf != null) {
             LOGGER.log(Level.FINE, "Use the data type factory: {0}", idf.getClass().getName());
             DatabaseConfig config = result.getConfig();
@@ -197,5 +192,5 @@ public final class DbUnitExecutorUtil {
         }
         return result;
     }
-    
+
 }

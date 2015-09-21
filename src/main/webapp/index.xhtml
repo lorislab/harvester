@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:jsf="http://xmlns.jcp.org/jsf"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:wsc="http://java.sun.com/jsf/composite/wsclient"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets">
+    <h:head>		
+        <title>Harvester</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>	
+        <link rel="shortcut icon" href="#{request.contextPath}/favicon.ico" />        
+        <h:outputStylesheet name="css/bootstrap.min.css"  />                       
+        <h:outputScript library="javax.faces" name="jsf.js" />
+
+<!--    
+        <script type="text/javascript">
+            var wsocket = new WebSocket('ws://' + document.location.host + '/harvester/update');
+            wsocket.addEventListener('message', function(evt){
+                console.log(evt);
+                var container = document.getElementById("logs");
+                jsf.ajax.request(container, event, {render: 'logs'});
+            });
+        </script>-->
+        
+    </h:head>
+
+    <body class="container">
+        
+        <wsc:wsclient channel="update" update="logs" message="logs"/>
+        
+        <div class="row">
+            <h1 class="page-header">Configuration</h1>
+            <div class="col-md-8">
+                <ul class="list-group">
+                    <li class="list-group-item">#{dashboard.directory.name}</li>
+                </ul>                    
+            </div>
+            <div class="col-md-4">
+                <h:form id="import">
+                    <button jsf:id="button" class="btn btn-success" type="button" jsf:disabled="#{dashboard.running}"  jsf:action="#{dashboard.startImportData()}" >Import all data
+                        <f:ajax event="click" execute="@this" />
+                    </button>
+                </h:form>
+            </div>
+        </div>
+        <div jsf:id="logs" class="row">
+            <ui:repeat var="log" value="#{dashboard.logs}" >
+                <span class="label label-danger">#{log.operation}</span> <span class="label label-danger">#{log.jndi}</span> #{log.message}
+            </ui:repeat>					
+        </div>
+       
+        <wsc:wsclient channel="update" update="import" message="close,start"/>
+    </body>
+      
+</html>

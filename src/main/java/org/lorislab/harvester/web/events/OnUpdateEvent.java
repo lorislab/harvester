@@ -13,17 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.lorislab.harvester.web.rs;
+package org.lorislab.harvester.web.events;
 
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.core.Application;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import javax.inject.Qualifier;
 
 /**
- * The application rest service path.
- * 
+ *
  * @author Andrej_Petras
  */
-@ApplicationPath("service")
-public class JaxRsActivator extends Application {
-    
+@Qualifier
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.TYPE})
+public @interface OnUpdateEvent {
+
 }
