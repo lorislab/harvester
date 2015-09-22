@@ -73,8 +73,6 @@ public class DirectoryDataImportExecutorService {
             LOGGER.info("Start");
             openEvents.fire("Start");
 
-            Thread.sleep(5000);
-            
             String dir = HarvesterProperties.getRootDirectory();
 
             Path root = Paths.get(dir);
@@ -92,8 +90,6 @@ public class DirectoryDataImportExecutorService {
                             Properties properties = HarvesterProperties.getHarvesterProperties(entry);
                             String jndi = properties.getProperty("jndi");                            
                             log.setJndi(jndi);                            
-
-                            Thread.sleep(5000);
                             
                             LOGGER.log(Level.INFO, "JNDI: {0}", jndi);
                             try (Connection connection = DataSourceUtil.getConnection(jndi)) {
@@ -116,8 +112,6 @@ public class DirectoryDataImportExecutorService {
             } else {
                 LOGGER.log(Level.WARNING, "The harvester root directory does not exists. Directory: {0}", root.toString());
             }
-            
-            Thread.sleep(5000);
             
         } catch (Exception ex) {
             ex.printStackTrace();

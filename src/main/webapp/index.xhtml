@@ -7,25 +7,16 @@
         <title>Harvester</title>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta>	
         <link rel="shortcut icon" href="#{request.contextPath}/favicon.ico" />        
-        <h:outputStylesheet name="css/bootstrap.min.css"  />                       
+        <h:outputStylesheet name="css/bootstrap.min.css"  />
+        <h:outputStylesheet name="css/fontello.css"  />
+        <h:outputStylesheet name="css/animation.css"  />
         <h:outputScript library="javax.faces" name="jsf.js" />
-
-<!--    
-        <script type="text/javascript">
-            var wsocket = new WebSocket('ws://' + document.location.host + '/harvester/update');
-            wsocket.addEventListener('message', function(evt){
-                console.log(evt);
-                var container = document.getElementById("logs");
-                jsf.ajax.request(container, event, {render: 'logs'});
-            });
-        </script>-->
-        
     </h:head>
 
     <body class="container">
-        
-        <wsc:wsclient channel="update" update="logs" message="logs"/>
-        
+
+        <wsc:wsclient channel="update" update="logs" message="logs,start"/>
+
         <div class="row">
             <h1 class="page-header">Configuration</h1>
             <div class="col-md-8">
@@ -35,19 +26,50 @@
             </div>
             <div class="col-md-4">
                 <h:form id="import">
-                    <button jsf:id="button" class="btn btn-success" type="button" jsf:disabled="#{dashboard.running}"  jsf:action="#{dashboard.startImportData()}" >Import all data
+                    <button jsf:id="button" class="btn btn-success" type="button" jsf:disabled="#{dashboard.running}"  jsf:action="#{dashboard.startImportData()}" >
+                        <i class="icon-spin3 animate-spin" jsf:rendered="#{dashboard.running}" /> 
+                        <i class="icon-play-circled" jsf:rendered="#{!dashboard.running}" />                         
+                        Import all data
                         <f:ajax event="click" execute="@this" />
                     </button>
                 </h:form>
             </div>
         </div>
-        <div jsf:id="logs" class="row">
-            <ui:repeat var="log" value="#{dashboard.logs}" >
-                <span class="label label-danger">#{log.operation}</span> <span class="label label-danger">#{log.jndi}</span> #{log.message}
-            </ui:repeat>					
+
+        <div  class="row">
+            <div class="panel panel-default">
+                <div class="panel-heading">Logs</div>
+                <table jsf:id="logs" class="table"> 
+                    <thead>
+                        <th>Status</th>
+                        <th>Operation</th>
+                        <th>File</th>
+                        <th>JNDI</th>
+                        <th>Message</th>
+                    </thead>
+                    <tbody>
+                        <ui:repeat var="log" value="#{dashboard.logs}" >
+                            <tr>
+                                <td>
+                                    <span style="color: #d9534f" jsf:rendered="#{not empty log.message}">
+                                        <i class="icon-attention-circled" />
+                                    </span>
+                                    <span style="color: #5cb85c" jsf:rendered="#{empty log.message}">
+                                        <i class="icon-ok-circled" />
+                                    </span>
+                                </td>
+                                <td>#{log.operation}</td>
+                                <td>#{log.file}</td>
+                                <td>#{log.jndi}</td>
+                                <td>#{log.message}</td>
+                            </tr>
+                        </ui:repeat>    
+                    </tbody>
+                </table>
+            </div>
         </div>
-       
+
         <wsc:wsclient channel="update" update="import" message="close,start"/>
     </body>
-      
+
 </html>

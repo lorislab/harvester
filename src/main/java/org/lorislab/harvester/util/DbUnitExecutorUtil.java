@@ -102,62 +102,21 @@ public final class DbUnitExecutorUtil {
      *
      * @param connection the connection.
      * @param operation the operation.
-     * @param data the data.
-     * @throws Exception if the method fails.
-     */
-    public static void execute(Connection connection, String operation, byte[] data) throws Exception {
-        IDatabaseConnection idbConnection = getIDatabaseConnection(connection);
-
-        try (InputStream in = new ByteArrayInputStream(data)) {
-
-            IDataSet dataSet = new XlsDataSet(in);
-
-            DatabaseOperation dbOperation = OPERATION.get(operation);
-            if (dbOperation != null) {
-                dbOperation.execute(idbConnection, dataSet);
-            } else {
-                LOGGER.log(Level.WARNING, "The operation: {0} is not registred", operation);
-            }
-        }
-    }
-
-    /**
-     * Executes the operation in the connection
-     *
-     * @param connection the connection.
-     * @param operation the operation.
-     * @param fileName the file name.
-     */
-    public static void execute(Connection connection, String operation, String fileName) throws Exception {
-        Path path = Paths.get(fileName);
-        if (Files.isReadable(path)) {
-            execute(connection, operation, path);
-        } else {
-            LOGGER.log(Level.SEVERE, "The {0} is not regular file.", fileName);
-        }
-    }
-
-    /**
-     * Executes the operation in the connection
-     *
-     * @param connection the connection.
-     * @param operation the operation.
      * @param path the file path.
      */
     public static void execute(Connection connection, String operation, Path path) throws Exception {
         LOGGER.log(Level.INFO, "Execute file: {0}", path.toString());
 
         IDatabaseConnection idbConnection = getIDatabaseConnection(connection);
-//        try (InputStream in = Files.newInputStream(path)) {
-            IDataSet dataSet = new CsvDataSet(path.toFile());
 
-            DatabaseOperation dbOperation = OPERATION.get(operation);
-            if (dbOperation != null) {
-                dbOperation.execute(idbConnection, dataSet);
-            } else {
-                throw new Exception("The operation: " + operation + " is not registred");
-            }
-//        }
+        IDataSet dataSet = new CsvDataSet(path.toFile());
+
+        DatabaseOperation dbOperation = OPERATION.get(operation);
+        if (dbOperation != null) {
+            dbOperation.execute(idbConnection, dataSet);
+        } else {
+            throw new Exception("The operation: " + operation + " is not registred");
+        }
     }
 
     /**
